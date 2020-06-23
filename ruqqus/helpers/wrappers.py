@@ -6,6 +6,7 @@ from werkzeug.wrappers.response import Response as RespObj
 from ruqqus.classes import *
 from .get import *
 from ruqqus.application import Base, app
+from urllib.parse import urlparse
 
 
 #Wrappers
@@ -28,7 +29,6 @@ def auth_desired(f):
         resp=make_response( f(*args, v=v, **kwargs))
         if v:
             resp.headers.add("Cache-Control", "private")
-            resp.headers.add("Access-Control-Allow-Origin",app.config["SERVER_NAME"])
         else:
             resp.headers.add("Cache-Control", "public")
         return resp
@@ -212,10 +212,10 @@ def no_cors(f):
     def wrapper(*args, **kwargs):
 
         origin = request.headers.get("Origin",None)
-
-        if origin and origin != "https://"+app.config["SERVER_NAME"]:
-
-            return "This page may not be embedded in other webpages.", 403
+        if origin:
+            scheme, netloc, path, params, query, fragment = urlparse(origin)
+            if netloc != app.config['SERVER_NAME']:
+                return "This page may not be embedded in other webpages.", 403
 
         resp = make_response(f(*args, **kwargs))
         resp.headers.add("Access-Control-Allow-Origin",
@@ -224,6 +224,7 @@ def no_cors(f):
 
         return resp
 
+    # TODO: use functools.wraps
     wrapper.__name__=f.__name__
     return wrapper
 
