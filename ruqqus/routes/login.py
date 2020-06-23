@@ -4,6 +4,7 @@ import hmac
 from os import environ
 import re
 import random
+from sqlalchemy.exc import IntegrityError
 from urllib.parse import urlencode
 
 from ruqqus.classes import *
@@ -357,10 +358,14 @@ def sign_up_post(v):
     g.db.begin()
 
     #give a beta badge
-    beta_badge=Badge(user_id=new_user.id,
-                        badge_id=6)
+    try:
+        beta_badge=Badge(user_id=new_user.id,
+                            badge_id=6)
 
-    g.db.add(beta_badge)
+        g.db.add(beta_badge)
+    except IntegrityError:
+        # No Beta badge present, perhaps a dev instance?
+        pass
     
                 
     #check alts
