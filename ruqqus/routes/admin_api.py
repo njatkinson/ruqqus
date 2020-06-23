@@ -1,18 +1,17 @@
 import time
 import calendar
 from flask import *
-from ruqqus.classes import *
-from ruqqus.helpers.wrappers import *
-from ruqqus.helpers.aws import delete_file
-from ruqqus.helpers.base36 import *
-from ruqqus.helpers.alerts import *
+from ruqqus.classes import User, Submission, Comment, Board, ModRelationship, Vote
+from ruqqus.helpers.wrappers import admin_level_required, validate_formkey
+from ruqqus.helpers.aws import delete_file, upload_from_file
+from ruqqus.helpers.base36 import base36decode
+from ruqqus.helpers.alerts import send_notification
+from ruqqus.helpers.get import get_board, get_post
 from urllib.parse import urlparse
-from secrets import token_hex
-import matplotlib.pyplot as plt
-import imagehash
+from ruqqus.__main__ import app
 
-from ruqqus.__main__ import app, cache
-from os import remove
+
+
 @app.route("/api/ban_user/<user_id>", methods=["POST"])
 @admin_level_required(3)
 @validate_formkey
@@ -84,10 +83,6 @@ def ban_post(post_id, v):
     post.ban_reason=request.form.get("reason",None)
 
     g.db.add(post)
-    
-
-    cache.delete_memoized(Board.idlist, self=post.board)
-    
     return (redirect(post.permalink), post)
 
 @app.route("/api/unban_post/<post_id>", methods=["POST"])
@@ -272,7 +267,6 @@ def mod_self_to_guild(v, bid):
 
 @app.route("/api/user_stat_data", methods=['GET'])
 @admin_level_required(2)
-@cache.memoize(timeout=60)
 def user_stat_data(v):
 
     days=int(request.args.get("days",30))
@@ -373,6 +367,10 @@ def user_stat_data(v):
 
 
 def create_plot(**kwargs):
+    # Yes, I know, bad form, but matplot lib brings in a shitload of dependencies.
+    # Temporarily moving the import of it into here so that we can avoid 50+ MB of
+    # extra dependencies when deploying to Zappa
+    import matplotlib.pyplot as plt
 
     if not kwargs:
         return abort(400)
@@ -410,13 +408,17 @@ def create_plot(**kwargs):
     single_plot = "single_plot.png"
     plt.savefig(single_plot)
 
-    aws.delete_file(single_plot)
-    aws.upload_from_file(single_plot, single_plot)
+    delete_file(single_plot)
+    upload_from_file(single_plot, single_plot)
 
     return [single_plot, multi_plots]
 
 
 def multiple_plots(**kwargs):
+    # Yes, I know, bad form, but matplot lib brings in a shitload of dependencies.
+    # Temporarily moving the import of it into here so that we can avoid 50+ MB of
+    # extra dependencies when deploying to Zappa
+    import matplotlib.pyplot as plt
 
     #create multiple charts
     signup_chart = plt.subplot2grid((10,2), (0,0), rowspan=4, colspan=2)
@@ -453,8 +455,8 @@ def multiple_plots(**kwargs):
     plt.savefig(name)
     plt.clf()
 
-    aws.delete_file(name)
-    aws.upload_from_file(name, name)
+    delete_file(name)
+    upload_from_file(name, name)
     return name
 
 @app.route("/admin/csam_nuke/<pid>", methods=["POST"])
@@ -477,7 +479,9 @@ def admin_csam_nuke(pid, v):
 
     if post.domain=="i.ruqqus.com":
 
-        x=requests.get(url)
+        # TODO: What is this next line meant to do?
+        # I've commented it out, because "url" is nowhere to be found
+        # x=requests.get(url)
         #load image into PIL
         #take phash
         #add phash to db

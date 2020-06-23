@@ -1,26 +1,15 @@
-import gevent.monkey
-gevent.monkey.patch_all()
-
 from os import environ
-import secrets
-from flask import *
-from flask_caching import Cache
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
-from flask_compress import Compress
+from flask import Flask, request, g, redirect
+from flask import session as flask_session
 from time import sleep
-
+import requests
 from flaskext.markdown import Markdown
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
-from sqlalchemy import *
-from sqlalchemy.pool import QueuePool
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
+import secrets
 import threading
-import requests
 
-from redis import BlockingConnectionPool
-
-from werkzeug.middleware.proxy_fix import ProxyFix
 
 
 _version = "2.12.1"
@@ -29,8 +18,6 @@ app = Flask(__name__,
             template_folder='./templates',
             static_folder='./static'
            )
-app.wsgi_app = ProxyFix(app.wsgi_app, num_proxies=2)
-
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = environ.get("DATABASE_URL")
 app.config['SECRET_KEY']=environ.get('MASTER_KEY')
@@ -48,31 +35,9 @@ app.jinja_env.cache = {}
 
 app.config["UserAgent"]=f"Ruqqus webserver tools for Ruqqus v{_version} developed by Ruqqus LLC for ruqqus.com."
 
-if "localhost" in app.config["SERVER_NAME"]:
-    app.config["CACHE_TYPE"]="null"
-else:
-    app.config["CACHE_TYPE"]=environ.get("CACHE_TYPE", 'null')
-    
-app.config["CACHE_REDIS_URL"]=environ.get("REDIS_URL")
-app.config["CACHE_DEFAULT_TIMEOUT"]=60
-app.config["CACHE_KEY_PREFIX"]="flask_caching_"
-
 
 Markdown(app)
-cache=Cache(app)
-Compress(app)
 
-
-app.config["RATELIMIT_STORAGE_URL"]=environ.get("REDIS_URL")
-app.config["RATELIMIT_KEY_PREFIX"]="flask_limiting_"
-
-limiter = Limiter(
-    app,
-    key_func=get_remote_address,
-    default_limits=["100/minute"],
-    headers_enabled=True,
-    strategy="fixed-window"
-)
 
 #setup db
 _engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], pool_size=3)
@@ -93,11 +58,6 @@ from ruqqus.routes import *
 import ruqqus.helpers.jinja2
 
 
-IP_BAN_CACHE_TTL = int(environ.get("IP_BAN_CACHE_TTL", 3600))
-UA_BAN_CACHE_TTL = int(environ.get("UA_BAN_CACHE_TTL", 3600))
-
-
-@cache.memoize(IP_BAN_CACHE_TTL)
 def is_ip_banned(remote_addr):
     """
     Given a remote address, returns whether or not user is banned
@@ -105,7 +65,6 @@ def is_ip_banned(remote_addr):
     return bool(g.db.query(ruqqus.classes.IP).filter_by(addr=remote_addr).count())
 
 
-@cache.memoize(UA_BAN_CACHE_TTL)
 def get_useragent_ban_response(user_agent_str):
     """
     Given a user agent string, returns a tuple in the form of:
@@ -123,7 +82,7 @@ def before_request():
 
     g.db = thread_session
 
-    session.permanent = True
+    flask_session.permanent = True
 
     if is_ip_banned(request.remote_addr):
         return "", 403
@@ -132,12 +91,8 @@ def before_request():
     if ua_banned and request.path != "/robots.txt":
         return response_tuple
 
-    if request.url.startswith("http://") and "localhost" not in app.config["SERVER_NAME"]:
-        url = request.url.replace("http://", "https://", 1)
-        return redirect(url, code=301)
-
-    if not session.get("session_id"):
-        session["session_id"]=secrets.token_hex(16)
+    if not flask_session.get("session_id"):
+        flask_session["session_id"]=secrets.token_hex(16)
 
    #db.rollback()
     g.db.begin()
@@ -157,7 +112,7 @@ def log_event(name, link):
 
 
 
-    url=os.environ.get("DISCORD_WEBHOOK")
+    url=environ.get("DISCORD_WEBHOOK")
     headers={"Content-Type":"application/json"}
     data={"username":"ruqqus",
           "content": text

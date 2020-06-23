@@ -1,10 +1,8 @@
-from ruqqus.helpers.base36 import *
+from ruqqus.helpers.base36 import base36encode
 from ruqqus.helpers.lazy import lazy
 import math
 import random
 import time
-
-from ruqqus.__main__ import cache
 
 
 class Stndrd:
@@ -107,7 +105,6 @@ class Age_times:
 class Scores:
 
     @property
-    #@cache.memoize(timeout=60)
     def score_percent(self):
 ##        try:
 ##            return int((self.ups/(self.ups+self.downs))*100)
@@ -117,7 +114,6 @@ class Scores:
         return 101
 
     @property
-    #@cache.memoize(timeout=60)
     def score(self):
         return int(self.score_top) if self.score_top else 0
 
@@ -126,7 +122,6 @@ class Scores:
 class Fuzzing:
 
     @property
-    #@cache.memoize(timeout=60)
     def score_fuzzed(self):
 
 

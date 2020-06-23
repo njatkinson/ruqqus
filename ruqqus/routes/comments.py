@@ -2,7 +2,7 @@ from urllib.parse import urlparse
 import mistletoe
 from sqlalchemy import func
 from bs4 import BeautifulSoup
-
+# TODO: Clean up imports
 from ruqqus.helpers.wrappers import *
 from ruqqus.helpers.base36 import *
 from ruqqus.helpers.sanitize import *
@@ -13,7 +13,7 @@ from ruqqus.helpers.get import *
 from ruqqus.helpers.session import *
 from ruqqus.classes import *
 from flask import *
-from ruqqus.__main__ import app, limiter
+from ruqqus.__main__ import app
 from werkzeug.contrib.atom import AtomFeed
 from datetime import datetime
 
@@ -184,7 +184,6 @@ def post_pid_comment_cid(p_id, c_id, anything=None, v=None):
             }
 
 @app.route("/api/comment", methods=["POST"])
-@limiter.limit("6/minute")
 @is_not_banned
 @tos_agreed
 @validate_formkey
@@ -391,10 +390,6 @@ def delete_comment(cid, v):
     c.is_deleted=True
 
     g.db.add(c)
-    
-
-    cache.delete_memoized(User.commentlisting, v)
-
     return "", 204
 
 

@@ -1,7 +1,9 @@
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask import *
+# from werkzeug.security import generate_password_hash, check_password_hash
+from flask import g, abort
+from flask import session as flask_session
 import time
-from sqlalchemy import *
+from sqlalchemy import Column, Integer, ForeignKey, String, Boolean, FetchedValue, or_, and_
+from sqlalchemy import text as sqla_text
 from sqlalchemy.orm import relationship, deferred
 from os import environ
 from secrets import token_hex
@@ -19,9 +21,9 @@ from .titles import Title
 from .submission import Submission
 from .comment import Comment, Notification
 from .boards import Board
-from .board_relationships import *
-from .mix_ins import *
-from ruqqus.__main__ import Base,cache
+from .mix_ins import Stndrd, Age_times
+from ruqqus.__main__ import Base
+
 
 
 class UserBlock(Base, Stndrd, Age_times):
@@ -145,8 +147,8 @@ class User(Base, Stndrd):
     @property
     def age(self):
         return int(time.time())-self.created_utc
-        
-    @cache.memoize(timeout=300)
+
+
     def idlist(self, sort="hot", page=1, t=None, hide_offensive=False, **kwargs):
 
         
@@ -233,7 +235,7 @@ class User(Base, Stndrd):
 
         return [x[0] for x in posts.offset(25*(page-1)).limit(26).all()]
 
-    @cache.memoize(300)
+
     def userpagelisting(self, v=None, page=1):
 
         submissions=g.db.query(Submission.id).filter_by(author_id=self.id)
@@ -274,7 +276,7 @@ class User(Base, Stndrd):
 
         return listing
 
-    @cache.memoize(300)
+
     def commentlisting(self, v=None, page=1):
         comments=self.comments.filter(Comment.parent_submission is not None)
 
@@ -332,12 +334,10 @@ class User(Base, Stndrd):
         return [x.board for x in self.moderates.filter_by(accepted=True).all() if x and x.board and not x.board.is_banned]
 
     @property
-    @cache.memoize(timeout=3600) #1hr cache time for user rep
     def karma(self):
         return int(self.energy)
 
     @property
-    @cache.memoize(timeout=3600)
     def comment_karma(self):
         return int(self.comment_energy)
 
@@ -351,7 +351,6 @@ class User(Base, Stndrd):
         return f"t1_{self.base36id}"
 
     @property
-    @cache.memoize(timeout=60)
     def has_report_queue(self):
         board_ids=[x.board_id for x in self.moderates.filter_by(accepted=True).all()]
         return bool(g.db.query(Submission).filter(Submission.board_id.in_(board_ids), Submission.mod_approved==0, Submission.report_count>=1, Submission.is_banned==False).first())
@@ -395,16 +394,16 @@ class User(Base, Stndrd):
     @property
     def formkey(self):
 
-        if "session_id" not in session:
-            session["session_id"]=token_hex(16)
+        if "session_id" not in flask_session:
+            flask_session["session_id"]=token_hex(16)
 
-        msg=f"{session['session_id']}+{self.id}+{self.login_nonce}"
+        msg=f"{flask_session['session_id']}+{self.id}+{self.login_nonce}"
 
         return generate_hash(msg)
 
     def validate_formkey(self, formkey):
 
-        return validate_hash(f"{session['session_id']}+{self.id}+{self.login_nonce}", formkey)
+        return validate_hash(f"{flask_session['session_id']}+{self.id}+{self.login_nonce}", formkey)
     
     @property
     def url(self):
@@ -457,11 +456,10 @@ class User(Base, Stndrd):
 
     @property
     def comment_count(self):
-
-        return self.comments.filter(text("parent_submission is not null")).filter_by(is_banned=False, is_deleted=False).count()
+        # TODO: Use proper filter here
+        return self.comments.filter(sqla_text("parent_submission is not null")).filter_by(is_banned=False, is_deleted=False).count()
 
     @property
-    #@cache.memoize(timeout=60)
     def badge_pairs(self):
 
         output=[]
@@ -557,8 +555,8 @@ class User(Base, Stndrd):
               "Board":Board,
               "Submission":Submission
               }
-
-        titles=[i for i in g.db.query(Title).order_by(text("id asc")).all() if eval(i.qualification_expr,{}, locs)]
+        # TODO: Replace sqla_text
+        titles=[i for i in g.db.query(Title).order_by(sqla_text("id asc")).all() if eval(i.qualification_expr,{}, locs)]
         return titles
 
     @property

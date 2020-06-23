@@ -17,7 +17,7 @@ from secrets import token_hex
 
 
 from ruqqus.mail import *
-from ruqqus.__main__ import app, limiter
+from ruqqus.__main__ import app
 
 valid_username_regex=re.compile("^\w{5,25}$")
 valid_password_regex=re.compile("^.{8,}$")
@@ -68,7 +68,6 @@ def check_for_alts(current_id):
 #login post procedure
 @no_cors
 @app.route("/login", methods=["POST"])
-@limiter.limit("6/minute")
 def login_post():
     
     username=request.form.get("username")

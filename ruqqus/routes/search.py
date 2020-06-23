@@ -1,12 +1,11 @@
-from ruqqus.classes import *
-from ruqqus.helpers.wrappers import *
+from flask import g, request, render_template
+from sqlalchemy import func, or_
+from ruqqus.classes import Submission, Board
+from ruqqus.helpers.wrappers import auth_desired
+from ruqqus.helpers.get import get_posts
+from ruqqus.__main__ import app
 
-from sqlalchemy import *
 
-from flask import *
-from ruqqus.__main__ import app, cache
-
-@cache.memoize(300)
 def searchlisting(q, v=None, page=1, sort="hot"):
 
     posts = g.db.query(Submission).filter(func.lower(Submission.title).contains(q.lower()))

@@ -1,6 +1,6 @@
 from os import environ
 import requests
-from ruqqus.__main__ import cache
+
 
 SERVER_ID=environ.get("DISCORD_SERVER_ID")
 CLIENT_ID=environ.get("DISCORD_CLIENT_ID")

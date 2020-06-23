@@ -1,10 +1,9 @@
-from ruqqus.helpers.base36 import *
-from ruqqus.helpers.security import *
-from sqlalchemy import *
+from sqlalchemy import Column, BigInteger, Integer, ForeignKey, Boolean, String
 from sqlalchemy.orm import relationship
-from ruqqus.__main__ import Base, cache
-from .mix_ins import *
+from ruqqus.__main__ import Base
+from .mix_ins import Stndrd, Age_times
 import time
+
 
 class ModRelationship(Base):
     __tablename__ = "mods"

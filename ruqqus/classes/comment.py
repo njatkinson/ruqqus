@@ -1,17 +1,13 @@
 from flask import *
-import time
 from sqlalchemy import *
 from sqlalchemy.orm import relationship, deferred
 from sqlalchemy.ext.associationproxy import association_proxy
-from random import randint
-import math
 from .mix_ins import *
-from ruqqus.helpers.base36 import *
+from ruqqus.helpers.base36 import base36decode
 from ruqqus.helpers.lazy import lazy
-from ruqqus.__main__ import Base, cache
+from ruqqus.__main__ import Base
 from .votes import CommentVote
-from .flags import CommentFlag
-from .badwords import *
+from .badwords import BadWord
 
 
 class Comment(Base, Age_times, Scores, Stndrd, Fuzzing):

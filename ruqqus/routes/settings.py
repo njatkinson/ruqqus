@@ -11,7 +11,8 @@ from ruqqus.helpers.markdown import *
 from ruqqus.helpers.aws import check_csam_url
 from ruqqus.mail import *
 from .front import frontlist
-from ruqqus.__main__ import app, cache
+from ruqqus.__main__ import app
+
 
 @app.route("/settings/profile", methods=["POST"])
 @is_not_banned
@@ -33,18 +34,15 @@ def settings_profile_post(v):
     if request.form.get("over18") != v.over_18:
         updated=True
         v.over_18=bool(request.form.get("over18", None))
-        cache.delete_memoized(User.idlist, v)
 
     if request.form.get("hide_offensive") != v.hide_offensive:
         updated=True
         v.hide_offensive=bool(request.form.get("hide_offensive", None))
-        cache.delete_memoized(User.idlist, v)
 
     if request.form.get("show_nsfl") != v.show_nsfl:
         updated=True
         v.show_nsfl=bool(request.form.get("show_nsfl", None))
-        cache.delete_memoized(User.idlist, v)
-        
+
     if request.form.get("private") != v.is_private:
         updated=True
         v.is_private=bool(request.form.get("private", None))
@@ -346,6 +344,7 @@ def settings_blockedpage(v):
         v=v,
         users=users)
 
+
 @app.route("/settings/block", methods=["POST"])
 @auth_required
 @validate_formkey
@@ -371,13 +370,9 @@ def settings_block_user(v):
                         created_utc=int(time.time())
                         )
     g.db.add(new_block)
-
-    cache.delete_memoized(User.idlist, self=v)
-    cache.delete_memoized(Board.idlist, v=v)
-    cache.delete_memoized(frontlist, v=v)
-
     return "", 204
-    
+
+
 @app.route("/settings/unblock", methods=["POST"])
 @auth_required
 @validate_formkey
@@ -390,9 +385,4 @@ def settings_unblock_user(v):
         abort(409)
 
     g.db.delete(x)
-
-    cache.delete_memoized(User.idlist, self=v)
-    cache.delete_memoized(Board.idlist, v=v)
-    cache.delete_memoized(frontlist, v=v)
-    
     return "", 204

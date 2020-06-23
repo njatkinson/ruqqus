@@ -6,6 +6,7 @@ import pyotp
 import qrcode
 import io
 
+# TODO: Clean imports
 from ruqqus.helpers.wrappers import *
 from ruqqus.helpers.base36 import *
 from ruqqus.helpers.sanitize import *
@@ -15,7 +16,7 @@ from ruqqus.helpers.markdown import *
 from ruqqus.helpers.get import *
 from ruqqus.classes import *
 from flask import *
-from ruqqus.__main__ import app, cache, limiter
+from ruqqus.__main__ import app
 
 BAN_REASONS=['',
             "URL shorteners are not permitted."
@@ -194,10 +195,6 @@ def follow_user(username, v):
                       target_id=target.id)
 
     g.db.add(new_follow)
-    
-
-    cache.delete_memoized(User.idlist, v, kind="user")
-
     return "", 204
 
 
@@ -214,10 +211,6 @@ def unfollow_user(username, v):
         abort(409)
 
     g.db.delete(follow)
-    
-
-    cache.delete_memoized(User.idlist, v, kind="user")
-
     return "", 204
 
 
@@ -234,7 +227,6 @@ def api_agree_tos(v):
 
 
 @app.route("/@<username>/pic/profile")
-@limiter.exempt
 def user_profile(username):
     x=get_user(username)
     return redirect(x.profile_url)

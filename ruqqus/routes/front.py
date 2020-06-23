@@ -5,7 +5,7 @@ from sqlalchemy import *
 from ruqqus.helpers.wrappers import *
 from ruqqus.helpers.get import *
 
-from ruqqus.__main__ import app, cache
+from ruqqus.__main__ import app
 from ruqqus.classes.submission import Submission
 
 
@@ -35,7 +35,7 @@ def notifications(v):
                            page=page,
                            standalone=True)
 
-@cache.memoize(timeout=300)
+
 def frontlist(sort="hot", page=1, nsfw=False, t=None, v=None, **kwargs):
 
     #cutoff=int(time.time())-(60*60*24*30)
@@ -211,7 +211,7 @@ def front_all(v):
             'api':lambda:[x.json for x in posts]
             }
 
-@cache.memoize(600)
+
 def guild_ids(sort="subs", page=1, nsfw=False):
     #cutoff=int(time.time())-(60*60*24*30)
 

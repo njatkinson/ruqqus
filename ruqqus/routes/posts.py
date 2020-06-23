@@ -20,7 +20,7 @@ from ruqqus.helpers.aws import *
 from ruqqus.classes import *
 from .front import frontlist
 from flask import *
-from ruqqus.__main__ import app, limiter, cache
+from ruqqus.__main__ import app
 
 BAN_REASONS=['',
              "URL shorteners are not permitted.",
@@ -113,7 +113,6 @@ def edit_post(pid, v):
     return redirect(p.permalink)
 
 @app.route("/api/submit/title", methods=['GET'])
-@limiter.limit("3/minute")
 @is_not_banned
 #@tos_agreed
 #@validate_formkey
@@ -146,7 +145,6 @@ def get_post_title(v):
 
 
 @app.route("/submit", methods=['POST'])
-@limiter.limit("6/minute")
 @is_not_banned
 @tos_agreed
 @validate_formkey
@@ -403,13 +401,7 @@ def submit_post(v):
         new_thread.start()
         csam_thread = threading.Thread(target=check_csam, args=(new_post,))
         csam_thread.start()
-
-    #expire the relevant caches: front page new, board new
-    #cache.delete_memoized(frontlist, sort="new")
-    cache.delete_memoized(Board.idlist, board, sort="new")
-
     #print(f"Content Event: @{new_post.author.username} post {new_post.base36id}")
-
     return redirect(new_post.permalink)
     
 # @app.route("/api/nsfw/<pid>/<x>", methods=["POST"])
@@ -445,16 +437,6 @@ def delete_post_pid(pid, v):
     post.is_deleted=True
     
     g.db.add(post)
-
-    #clear cache
-    cache.delete_memoized(User.userpagelisting, v, sort="new")
-    cache.delete_memoized(Board.idlist, post.board)
-
-    if post.age >= 3600*6:
-        cache.delete_memoized(Board.idlist, post.board, sort="new")
-        cache.delete_memoized(frontlist, sort="new")
-    
-
     #delete i.ruqqus.com
     if post.domain=="i.ruqqus.com":
         

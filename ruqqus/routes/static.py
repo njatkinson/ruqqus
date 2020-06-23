@@ -7,11 +7,11 @@ from ruqqus.helpers.wrappers import *
 import ruqqus.classes
 from ruqqus.classes import *
 from ruqqus.mail import *
-from ruqqus.__main__ import app, limiter
+from ruqqus.__main__ import app
+
 
 #take care of misc pages that never really change (much)
 @app.route('/assets/<path:path>')
-@limiter.exempt
 def static_service(path):
     resp = make_response(send_from_directory('./assets', path))
     resp.headers.add("Cache-Control", "public")

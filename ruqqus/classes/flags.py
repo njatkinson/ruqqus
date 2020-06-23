@@ -1,6 +1,6 @@
 from sqlalchemy import *
-from ruqqus.__main__ import Base, cache
-from .mix_ins import *
+from ruqqus.__main__ import Base
+from .mix_ins import Stndrd
 
 
 class Flag(Base, Stndrd):

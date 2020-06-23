@@ -1,23 +1,17 @@
-import time
-import json
 from os import environ
-from sqlalchemy import text
-
 from ruqqus.classes.user import User
-from .get import *
-from ruqqus.__main__ import app, cache
+from .get import get_mod
+from ruqqus.__main__ import app
 
 
 
 @app.template_filter("total_users")
-@cache.memoize(timeout=60)
 def total_users(x):
-
+    # TODO: Reference to db is bad. Does this need to be fixed or can this code go away?
     return db.query(User).filter_by(is_banned=0).count()
 
 
 @app.template_filter("source_code")
-@cache.memoize(timeout=60*60*24)
 def source_code(file_name):
 
     return open("/app/"+file_name, mode="r+").read()
@@ -48,7 +42,6 @@ def js_str_escape(s):
     return s
 
 @app.template_filter("is_mod")
-@cache.memoize(60)
 def jinja_is_mod(uid, bid):
 
     return bool(get_mod(uid, bid))

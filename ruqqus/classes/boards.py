@@ -1,17 +1,14 @@
 from sqlalchemy import *
 from sqlalchemy.orm import relationship, deferred
 import time
-
-from ruqqus.helpers.base36 import *
-from ruqqus.helpers.security import *
-from ruqqus.helpers.lazy import *
-from ruqqus.helpers.session import *
+from flask import abort, g
 import ruqqus.helpers.aws as aws
-from .submission import *
-from .board_relationships import *
+from .submission import Submission
+from .board_relationships import ModRelationship, BanRelationship
 from .comment import Comment
-from .mix_ins import *
-from ruqqus.__main__ import Base, cache
+from .mix_ins import Stndrd, Age_times
+from ruqqus.__main__ import Base
+
 
 class Board(Base, Stndrd, Age_times):
 
@@ -90,7 +87,7 @@ class Board(Base, Stndrd, Age_times):
             return False
         return not self.postrels.filter_by(post_id=post.id).first()
 
-    @cache.memoize(timeout=60)
+
     def idlist(self, sort="hot", page=1, t=None, show_offensive=True, v=None, **kwargs):
 
         posts=g.db.query(Submission.id).filter_by(is_banned=False,

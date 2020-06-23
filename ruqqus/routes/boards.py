@@ -5,6 +5,7 @@ import sass
 import threading
 import time
 
+# TODO: Clean up this imports
 from ruqqus.helpers.wrappers import *
 from ruqqus.helpers.base36 import *
 from ruqqus.helpers.sanitize import *
@@ -18,7 +19,7 @@ from .front import guild_ids
 from ruqqus.classes.rules import *
 from flask import *
 
-from ruqqus.__main__ import app, limiter, cache
+from ruqqus.__main__ import app
 
 valid_board_regex=re.compile("^[a-zA-Z0-9]\w{2,24}$")
 
@@ -123,16 +124,13 @@ def create_board_post(v):
     sub=Subscription(user_id=v.id,
                      board_id=new_board.id)
     g.db.add(sub)
-    
-
-    #clear cache
-    cache.delete_memoized(guild_ids, sort="new")
-
     return redirect(new_board.permalink)
+
 
 @app.route("/r/<name>")
 def reddit_moment_redirect(name):
     return redirect(f"/+{name}")
+
 
 @app.route("/+<name>", methods=["GET"])
 @app.route("/api/v1/guild/<name>/listing", methods=["GET"])
@@ -226,11 +224,8 @@ def mod_kick_bid_pid(bid,pid, board, v):
     post.guild_name="general"
     post.is_pinned=False
     g.db.add(post)
-    
-
-    cache.delete_memoized(Board.idlist, board)
-
     return "", 204
+
 
 @app.route("/mod/accept/<bid>/<pid>", methods=["POST"])
 @auth_required
@@ -346,12 +341,8 @@ def user_kick_pid(pid, v):
     post.is_pinned=False
     
     g.db.add(post)
-    
-    
-    #clear board's listing caches
-    cache.delete_memoized(Board.idlist, current_board)
-    
     return "", 204
+
 
 @app.route("/mod/take/<pid>", methods=["POST"])
 @auth_required
@@ -383,12 +374,8 @@ def mod_take_pid(pid, v):
     post.board_id=board.id
     post.guild_name=board.name
     g.db.add(post)
-    
-
-    #clear board's listing caches
-    cache.delete_memoized(Board.idlist, board)
-    
     return "", 204
+
 
 @app.route("/mod/invite_mod/<bid>", methods=["POST"])
 @auth_required
@@ -747,16 +734,9 @@ def subscribe_board(boardname, v):
             
             return "", 204
 
-    
     new_sub=Subscription(user_id=v.id,
                          board_id=board.id)
-
     g.db.add(new_sub)
-    
-
-    #clear your cached guild listings
-    cache.delete_memoized(User.idlist, v, kind="board")
-
     return "", 204
 
 
@@ -777,12 +757,8 @@ def unsubscribe_board(boardname, v):
     sub.is_active=False
 
     g.db.add(sub)
-    
-
-    #clear your cached guild listings
-    cache.delete_memoized(User.idlist, v, kind="board")
-
     return "", 204
+
 
 @app.route("/+<boardname>/mod/queue", methods=["GET"])
 @auth_required
@@ -905,7 +881,6 @@ def mod_board_images_delete_banner(bid, board, v):
 
     
 @app.route("/+<boardname>/main/<x>.css", methods=["GET"])
-#@cache.memoize(60*6*24)
 def board_css(boardname, x):
 
     board=get_guild(boardname)
@@ -927,7 +902,6 @@ def board_css(boardname, x):
     return resp
 
 @app.route("/+<boardname>/dark/<x>.css", methods=["GET"])
-#@cache.memoize(60*60*24)
 def board_dark_css(boardname, x):
 
     board=get_guild(boardname)
@@ -971,15 +945,8 @@ def mod_board_color(bid, board, v):
     board.color_nonce+=1
     
     g.db.add(board)
-    
-
-    try:
-        cache.delete_memoized(board_css, board.name)
-        cache.delete_memoized(board_dark_css, board.name)
-    except:
-        pass
-    
     return redirect(f"/+{board.name}/mod/appearance?msg=Success")
+
 
 @app.route("/mod/approve/<bid>", methods=["POST"])
 @auth_required
@@ -1035,12 +1002,10 @@ def mod_unapprove_bid_user(bid, board, v):
     x.is_active=False
 
     g.db.add(x)
-    
-    
     return "", 204
 
+
 @app.route("/+<guild>/pic/profile")
-@limiter.exempt
 def guild_profile(guild):
     x=get_guild(guild)
 
@@ -1221,13 +1186,6 @@ def mod_toggle_post_pin(bid, pid, x, board, v):
     if x and not board.can_pin_another:
         return jsonify({"error":f"+{board.name} already has the maximum number of pinned posts."}), 409
 
-
     post.is_pinned=x
-
-
-    cache.delete_memoized(Board.idlist, post.board)
-
     g.db.add(post)
-    
-
     return "", 204

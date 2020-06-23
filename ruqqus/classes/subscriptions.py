@@ -1,9 +1,8 @@
-from ruqqus.helpers.base36 import *
-from ruqqus.helpers.security import *
-from sqlalchemy import *
+from sqlalchemy import Column, BigInteger, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
-from ruqqus.__main__ import Base, cache
+from ruqqus.__main__ import Base
 import time
+
 
 class Subscription(Base):
     __tablename__ = "subscriptions"
@@ -24,6 +23,7 @@ class Subscription(Base):
 
     def __repr__(self):
         return f"<Subscription(id={self.id})>"
+
 
 class Follow(Base):
     __tablename__ = "follows"
