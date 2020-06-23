@@ -1,6 +1,6 @@
 import re
 from urllib.parse import *
-from ruqqus.__main__ import app
+from ruqqus.application import app
 
 youtube_regex=re.compile("^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*")
 

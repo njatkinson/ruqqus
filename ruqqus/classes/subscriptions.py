@@ -1,6 +1,6 @@
 from sqlalchemy import Column, BigInteger, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
-from ruqqus.__main__ import Base
+from ruqqus.application import Base
 import time
 
 

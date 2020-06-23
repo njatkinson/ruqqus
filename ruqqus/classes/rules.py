@@ -1,7 +1,7 @@
 from .mix_ins import Stndrd, Age_times
 import time
 from sqlalchemy import Column, BigInteger, Integer, ForeignKey, String
-from ruqqus.__main__ import Base
+from ruqqus.application import Base
 
 
 class Rules(Base, Stndrd, Age_times):

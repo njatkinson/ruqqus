@@ -6,7 +6,7 @@ from werkzeug.utils import secure_filename
 from ruqqus.helpers.get import *
 from ruqqus.helpers.wrappers import *
 from ruqqus.mail.mail import send_mail
-from ruqqus.__main__ import app
+from ruqqus.application import app
 
 
 @app.route("/legal", methods=["GET"])

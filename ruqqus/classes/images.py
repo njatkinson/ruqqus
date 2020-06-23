@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from flask import g
 
 from ruqqus.helpers.base36 import *
-from ruqqus.__main__ import Base
+from ruqqus.application import Base
 class Image(Base):
     __tablename__ = "images"
     id = Column(BigInteger, primary_key=True)

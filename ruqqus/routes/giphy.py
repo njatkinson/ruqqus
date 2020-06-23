@@ -2,7 +2,7 @@ from flask import *
 from os import environ
 import requests
 
-from ruqqus.__main__ import app
+from ruqqus.application import app
 
 @app.route("/giphy", methods=["GET"])
 @app.route("/giphy<path>", methods=["GET"])

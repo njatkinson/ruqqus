@@ -8,7 +8,7 @@ from ruqqus.helpers.base36 import base36decode
 from ruqqus.helpers.alerts import send_notification
 from ruqqus.helpers.get import get_board, get_post
 from urllib.parse import urlparse
-from ruqqus.__main__ import app
+from ruqqus.application import app
 
 
 

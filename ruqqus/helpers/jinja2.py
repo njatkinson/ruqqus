@@ -1,7 +1,7 @@
 from os import environ
 from ruqqus.classes.user import User
 from .get import get_mod
-from ruqqus.__main__ import app
+from ruqqus.application import app
 
 
 

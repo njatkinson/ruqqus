@@ -5,7 +5,7 @@ from sqlalchemy import *
 from ruqqus.helpers.wrappers import *
 from ruqqus.helpers.get import *
 
-from ruqqus.__main__ import app
+from ruqqus.application import app
 from ruqqus.classes.submission import Submission
 
 

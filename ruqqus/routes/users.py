@@ -16,7 +16,7 @@ from ruqqus.helpers.markdown import *
 from ruqqus.helpers.get import *
 from ruqqus.classes import *
 from flask import *
-from ruqqus.__main__ import app
+from ruqqus.application import app
 
 BAN_REASONS=['',
             "URL shorteners are not permitted."

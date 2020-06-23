@@ -3,7 +3,7 @@ from sqlalchemy import func, or_
 from ruqqus.classes import Submission, Board
 from ruqqus.helpers.wrappers import auth_desired
 from ruqqus.helpers.get import get_posts
-from ruqqus.__main__ import app
+from ruqqus.application import app
 
 
 def searchlisting(q, v=None, page=1, sort="hot"):

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, BigInteger, Integer, ForeignKey, Boolean, String
 from sqlalchemy.orm import relationship
-from ruqqus.__main__ import Base
+from ruqqus.application import Base
 from .mix_ins import Stndrd, Age_times
 import time
 

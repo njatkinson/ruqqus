@@ -1,4 +1,4 @@
-from ruqqus.__main__ import make_session
+from ruqqus.application import make_session
 from ruqqus import classes
 
 import time

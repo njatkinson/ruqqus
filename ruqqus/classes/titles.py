@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, Boolean, String
-from ruqqus.__main__ import Base
+from ruqqus.application import Base
 
 class Title(Base):
 

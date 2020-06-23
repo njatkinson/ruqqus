@@ -8,7 +8,7 @@ from ruqqus.helpers.security import *
 from ruqqus.helpers.jinja2 import full_link
 from ruqqus.helpers.get import *
 
-from ruqqus.__main__ import app
+from ruqqus.application import app
 
 
 @app.route('/feeds/<sort>', methods=["GET"])

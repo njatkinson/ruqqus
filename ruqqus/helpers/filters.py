@@ -3,7 +3,7 @@ from flask import *
 from os import environ
 from urllib.parse import urlparse
 from ruqqus.classes import Domain
-from ruqqus.__main__ import app
+from ruqqus.application import app
 
 def filter_comment_html(html_text):
 

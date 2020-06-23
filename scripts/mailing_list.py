@@ -1,4 +1,4 @@
-from ruqqus.__main__ import app, db
+from ruqqus.application import app, db
 from ruqqus import classes
 from ruqqus.mail import send_mail
 from flask import render_template

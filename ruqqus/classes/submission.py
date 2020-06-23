@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 from flask import render_template, request, abort, g
 from sqlalchemy import Column, BigInteger, ForeignKey, String, Boolean, Integer, Float, FetchedValue
 from sqlalchemy.orm import relationship, deferred
-from ruqqus.__main__ import Base
+from ruqqus.application import Base
 from ruqqus.helpers.lazy import lazy
 from ruqqus.helpers.base36 import base36encode
 from ruqqus.classes.flags import Report

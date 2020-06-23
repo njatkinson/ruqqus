@@ -22,7 +22,7 @@ from .submission import Submission
 from .comment import Comment, Notification
 from .boards import Board
 from .mix_ins import Stndrd, Age_times
-from ruqqus.__main__ import Base
+from ruqqus.application import Base
 
 
 

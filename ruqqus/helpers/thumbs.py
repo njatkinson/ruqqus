@@ -6,7 +6,7 @@ from PIL import Image as PILimage
 from flask import g
 
 from .get import *
-from ruqqus.__main__ import app, make_session
+from ruqqus.application import app, make_session
 
 headers={"User-Agent":app.config["UserAgent"]}
 

@@ -4,7 +4,7 @@ from ruqqus.helpers.wrappers import *
 from ruqqus.helpers.get import *
 from ruqqus.helpers.base36 import *
 from flask import g
-from ruqqus.__main__ import app
+from ruqqus.application import app
 
 @app.route("/api/flag/post/<pid>", methods=["POST"])
 @is_not_banned

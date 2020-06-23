@@ -5,7 +5,7 @@ from werkzeug.wrappers.response import Response as RespObj
 
 from ruqqus.classes import *
 from .get import *
-from ruqqus.__main__ import Base, app
+from ruqqus.application import Base, app
 
 
 #Wrappers

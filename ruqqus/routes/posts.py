@@ -20,7 +20,7 @@ from ruqqus.helpers.aws import *
 from ruqqus.classes import *
 from .front import frontlist
 from flask import *
-from ruqqus.__main__ import app
+from ruqqus.application import app
 
 BAN_REASONS=['',
              "URL shorteners are not permitted.",

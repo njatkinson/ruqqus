@@ -7,7 +7,7 @@ from .submission import Submission
 from .board_relationships import ModRelationship, BanRelationship
 from .comment import Comment
 from .mix_ins import Stndrd, Age_times
-from ruqqus.__main__ import Base
+from ruqqus.application import Base
 
 
 class Board(Base, Stndrd, Age_times):

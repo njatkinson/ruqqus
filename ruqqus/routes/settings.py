@@ -11,7 +11,7 @@ from ruqqus.helpers.markdown import *
 from ruqqus.helpers.aws import check_csam_url
 from ruqqus.mail import *
 from .front import frontlist
-from ruqqus.__main__ import app
+from ruqqus.application import app
 
 
 @app.route("/settings/profile", methods=["POST"])
